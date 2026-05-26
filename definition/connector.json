@@ -1,43 +1,169 @@
 {
   "$schema": "https://schemas.analitiq.ai/connector/latest.json",
-  "kind": "api",
-  "display_name": "REPLACE",
-  "description": "REPLACE with a short description",
-  "version": "1.0.0",
-  "default_transport": "api",
+  "kind": "database",
+  "display_name": "Snowflake",
+  "description": "Connector for Snowflake, a cloud data warehouse platform, using the snowflake-sqlalchemy driver over always-on HTTPS/TLS.",
+  "documentation_url": "https://docs.snowflake.com/en/developer-guide/python-connector/sqlalchemy",
+  "tags": ["database", "warehouse", "snowflake", "cloud", "sqlalchemy", "analytics"],
+  "version": "0.0.0",
+  "default_transport": "database",
   "transports": {
-    "api": {
-      "transport_type": "http",
-      "base_url": "https://api.example.com/v1/",
-      "headers": {
-        "Accept": "application/json",
-        "Content-Type": "application/json",
-        "Authorization": { "template": "Bearer ${secrets.api_key}" }
-      },
-      "timeout_seconds": 30,
-      "rate_limit": {
-        "max_requests": 60,
-        "time_window_seconds": 60
+    "database": {
+      "transport_type": "sqlalchemy",
+      "driver": "snowflake",
+      "dsn": {
+        "kind": "url_template",
+        "template": "snowflake://{username}:{password}@{account}/{database}/{schema}?warehouse={warehouse}&role={role}",
+        "bindings": {
+          "username":  { "value": { "ref": "connection.parameters.user" }, "encoding": "url_userinfo" },
+          "password":  { "value": { "ref": "secrets.password" }, "encoding": "url_userinfo" },
+          "account":   { "value": { "ref": "connection.parameters.account" }, "encoding": "host" },
+          "database":  { "value": { "ref": "connection.parameters.database" }, "encoding": "url_path_segment" },
+          "schema":    { "value": { "ref": "connection.parameters.schema" }, "encoding": "url_path_segment" },
+          "warehouse": { "value": { "ref": "connection.parameters.warehouse" }, "encoding": "url_query_value" },
+          "role":      { "value": { "ref": "connection.parameters.role" }, "encoding": "url_query_value" }
+        }
       }
     }
   },
   "auth": {
-    "type": "api_key"
+    "type": "db"
   },
   "connection_contract": {
     "inputs": {
-      "api_key": {
+      "account": {
         "source": "user",
         "phase": "pre_auth",
+        "storage": "connection.parameters",
+        "type": "string",
+        "required": true,
+        "ui": {
+          "label": "Account identifier",
+          "widget": "text",
+          "placeholder": "e.g. myorg-myaccount",
+          "help_text": "Snowflake account identifier in org-account form (e.g. `myorg-myaccount`). Legacy locator form (e.g. `xy12345.us-east-2.aws`) is also accepted. This is the account identifier, NOT a hostname."
+        }
+      },
+      "user": {
+        "source": "user",
+        "phase": "auth",
+        "storage": "connection.parameters",
+        "type": "string",
+        "required": true,
+        "ui": {
+          "label": "Username",
+          "widget": "text",
+          "placeholder": "e.g. SNOWFLAKE_USER"
+        }
+      },
+      "password": {
+        "source": "user",
+        "phase": "auth",
         "storage": "secrets",
         "type": "string",
         "required": true,
         "secret": true,
         "ui": {
-          "label": "API Key",
+          "label": "Password",
           "widget": "password"
         }
+      },
+      "warehouse": {
+        "source": "user",
+        "phase": "pre_auth",
+        "storage": "connection.parameters",
+        "type": "string",
+        "required": true,
+        "ui": {
+          "label": "Warehouse",
+          "widget": "text",
+          "placeholder": "e.g. COMPUTE_WH",
+          "help_text": "Virtual warehouse used for compute. Required for queries that consume credits."
+        }
+      },
+      "database": {
+        "source": "user",
+        "phase": "pre_auth",
+        "storage": "connection.parameters",
+        "type": "string",
+        "required": false,
+        "ui": {
+          "label": "Default database",
+          "widget": "text",
+          "placeholder": "e.g. ANALYTICS"
+        }
+      },
+      "schema": {
+        "source": "user",
+        "phase": "pre_auth",
+        "storage": "connection.parameters",
+        "type": "string",
+        "required": false,
+        "default": "PUBLIC",
+        "ui": {
+          "label": "Default schema",
+          "widget": "text",
+          "placeholder": "PUBLIC"
+        }
+      },
+      "role": {
+        "source": "user",
+        "phase": "pre_auth",
+        "storage": "connection.parameters",
+        "type": "string",
+        "required": false,
+        "ui": {
+          "label": "Role",
+          "widget": "text",
+          "placeholder": "e.g. ANALYST",
+          "help_text": "Role to assume for the session. If omitted, the user's default role is used."
+        }
       }
+    }
+  },
+  "resource_discovery": {
+    "strategy": "snowflake_account_usage",
+    "transport_ref": "database",
+    "implementation": { "type": "builtin" },
+    "options": {
+      "exclude_schemas": ["INFORMATION_SCHEMA"]
+    },
+    "produces": ["connection.endpoints", "connection.type_map"],
+    "triggers": {
+      "list_resources": "on_activation",
+      "describe_resource": "on_resource_selected"
+    }
+  },
+  "type_maps": {
+    "native_to_arrow": {
+      "rules": [
+        { "method": "exact", "native": "NUMBER",        "canonical": "Decimal128(38, 0)" },
+        { "method": "exact", "native": "DECIMAL",       "canonical": "Decimal128(38, 0)" },
+        { "method": "exact", "native": "INT",           "canonical": "Decimal128(38, 0)" },
+        { "method": "exact", "native": "INTEGER",       "canonical": "Decimal128(38, 0)" },
+        { "method": "exact", "native": "BIGINT",        "canonical": "Decimal128(38, 0)" },
+        { "method": "exact", "native": "SMALLINT",      "canonical": "Decimal128(38, 0)" },
+        { "method": "exact", "native": "FLOAT",         "canonical": "Float64" },
+        { "method": "exact", "native": "DOUBLE",        "canonical": "Float64" },
+        { "method": "exact", "native": "VARCHAR",       "canonical": "Utf8" },
+        { "method": "exact", "native": "CHAR",          "canonical": "Utf8" },
+        { "method": "exact", "native": "STRING",        "canonical": "Utf8" },
+        { "method": "exact", "native": "TEXT",          "canonical": "Utf8" },
+        { "method": "exact", "native": "BINARY",        "canonical": "Binary" },
+        { "method": "exact", "native": "VARBINARY",     "canonical": "Binary" },
+        { "method": "exact", "native": "BOOLEAN",       "canonical": "Boolean" },
+        { "method": "exact", "native": "DATE",          "canonical": "Date32" },
+        { "method": "exact", "native": "TIME",          "canonical": "Time64(NANOSECOND)" },
+        { "method": "exact", "native": "TIMESTAMP",     "canonical": "Timestamp(NANOSECOND)" },
+        { "method": "exact", "native": "TIMESTAMP_NTZ", "canonical": "Timestamp(NANOSECOND)" },
+        { "method": "exact", "native": "TIMESTAMP_LTZ", "canonical": "Timestamp(NANOSECOND, UTC)" },
+        { "method": "exact", "native": "TIMESTAMP_TZ",  "canonical": "Timestamp(NANOSECOND, UTC)" },
+        { "method": "exact", "native": "VARIANT",       "canonical": "Utf8" },
+        { "method": "exact", "native": "OBJECT",        "canonical": "Utf8" },
+        { "method": "exact", "native": "ARRAY",         "canonical": "Utf8" },
+        { "method": "exact", "native": "GEOGRAPHY",     "canonical": "Utf8" },
+        { "method": "exact", "native": "GEOMETRY",      "canonical": "Utf8" }
+      ]
     }
   }
 }

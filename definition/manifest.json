@@ -1,7 +1,7 @@
 {
-  "connector_id": "REPLACE-WITH-UUID",
-  "connector_name": "REPLACE",
-  "slug": "REPLACE",
-  "version": "1.0.1",
+  "connector_id": "8fa1ab11-6b30-400a-b803-74fb9b07be8a",
+  "connector_name": "Snowflake",
+  "slug": "snowflake",
+  "version": "0.0.0",
   "endpoints": []
 }
