@@ -1,10 +1,10 @@
-# REPLACE_CONNECTOR_NAME
+# Snowflake
 
-REPLACE with a short description of what this connector does and what system it integrates with.
+Connect to a [Snowflake](https://www.snowflake.com) cloud data warehouse and read data from any database, schema, and table your role can access. Uses the native ADBC Snowflake driver with standard username and password authentication over TLS.
 
 ## What is this?
 
-This is a **connector** — a configuration that defines how to authenticate with REPLACE_SYSTEM_NAME and what data endpoints are available for reading and writing. It does not move data by itself. Instead, it is used by the [Analitiq](https://analitiq-app.com) data integration platform or the open-source `analitiq-dip-registry` engine to set up data pipelines.
+This is a **connector** — a configuration that defines how to authenticate with Snowflake and how its databases, schemas, and tables are discovered for reading and writing. It does not move data by itself. Instead, it is used by the [Analitiq](https://analitiq-app.com) data integration platform or the open-source `analitiq-dip-registry` engine to set up data pipelines.
 
 ## How to use this connector
 
@@ -27,43 +27,69 @@ The `analitiq-plugin-dataflow` plugin will automatically fetch the required conn
 
 ## Prerequisites
 
-REPLACE with what the user needs before they can connect. Be specific:
+Before you can connect, you need:
 
-- e.g., "A registered OAuth2 application with client ID and client secret"
-- e.g., "An API key generated from your account settings"
-- e.g., "Admin access to your organisation's account"
+- A Snowflake account and its **account identifier** (e.g. `orgname-account_name`). This is the part of your Snowflake URL before `.snowflakecomputing.com`.
+- A Snowflake **user** with a password and access to at least one warehouse, database, and schema.
+- A **virtual warehouse** that the user can use to run queries (queries require an active warehouse).
+- A **role** granting the privileges you need (optional — defaults to the user's default role).
 
 ## Authentication
 
-REPLACE with a plain-language explanation of how to authenticate. If the system supports multiple authentication methods, explain when to use each one.
+This connector uses standard Snowflake **username and password** authentication. All communication runs over TLS — Snowflake is HTTPS-only, so there is no plaintext option and no TLS mode to configure.
+
+The connection is established by the engine's native ADBC Snowflake driver. You provide the account identifier, username, and password; the warehouse, database, schema, and role are optional session defaults.
+
+> **Note on other auth methods.** Snowflake also supports key-pair (JWT), OAuth, MFA, external-browser SSO, Okta, programmatic access tokens, and Workload Identity Federation. This connector targets the username + password model only. If you need one of the alternatives, open an issue or extend the connector with the builder plugin.
+
+### Connection fields
+
+| Field | Required | Description |
+|-------|----------|-------------|
+| `account` | yes | Snowflake account identifier (e.g. `orgname-account_name`), without the `.snowflakecomputing.com` suffix. |
+| `username` | yes | Snowflake login username. |
+| `password` | yes | Password for the user (stored as a secret). |
+| `warehouse` | no | Default virtual warehouse used to run queries (e.g. `COMPUTE_WH`). |
+| `database` | no | Default database for the session. |
+| `schema` | no | Default schema within the database (defaults to `PUBLIC`). |
+| `role` | no | Role used for authorization (defaults to the user's default role). |
+| `host` | no | Explicit connection host override (normally derived from `account`). |
+| `port` | no | Connection port (defaults to `443`). |
 
 ### How to get your credentials
 
-REPLACE with step-by-step instructions:
+1. Log in to your Snowflake account in the Snowsight web UI.
+2. Find your **account identifier** — in Snowsight, open the account selector (bottom-left), and copy the account identifier in `orgname-account_name` form.
+3. Use an existing user, or ask an admin to create one with `CREATE USER`. Make sure it has a password and is granted a role with the privileges you need (`GRANT ROLE ... TO USER ...`).
+4. Confirm the user has access to a warehouse (`GRANT USAGE ON WAREHOUSE ... TO ROLE ...`) — queries cannot run without one.
 
-1. e.g., "Log in to your account at https://app.example.com"
-2. e.g., "Navigate to Settings > API Keys"
-3. e.g., "Click 'Generate New Key' and copy the key"
+## Available data
 
-## Available Endpoints
+Snowflake is a database connector. Rather than a fixed set of endpoints, it discovers your databases, schemas, and tables at connection time and exposes them as resources you can read from or write to. Which objects are visible depends on the privileges of the role you connect with.
 
-The table below lists all data endpoints defined by this connector. Each endpoint represents a resource you can read from or write to.
+## Type mapping
 
-| Endpoint | Method | Description |
-|----------|--------|-------------|
-|          |        |             |
+Snowflake's native SQL types are mapped to Analitiq's canonical (Arrow-based) types by `definition/type-map.json`. Highlights:
+
+- `NUMBER` / `DECIMAL` / `INT` → `Decimal128` (Snowflake's `INT` is `NUMBER(38,0)`)
+- `FLOAT` / `DOUBLE` → `Float64`
+- `VARCHAR` / `CHAR` / `STRING` → `Utf8`
+- `BINARY` → `Binary`
+- `DATE` → `Date32`, `TIME` → `Time64`
+- `TIMESTAMP_NTZ` → `Timestamp`, `TIMESTAMP_LTZ` / `TIMESTAMP_TZ` → `Timestamp(..., UTC)`
+- `VARIANT` / `OBJECT` / `ARRAY` / `MAP` / `VECTOR` → `Json`
+- `GEOGRAPHY` / `GEOMETRY` → `Utf8` (serialized as text)
 
 ## Limitations
 
-REPLACE with any important limitations users should know about:
-
-- **Rate limits** — e.g., "The API allows 60 requests per minute"
-- **Data freshness** — e.g., "Data may be delayed by up to 15 minutes"
-- **Sandbox vs Production** — e.g., "Sandbox and production use different API keys"
+- **Warehouse required** — queries consume credits and require an active virtual warehouse. If no warehouse is set (and the user has no default), queries will fail.
+- **TLS only** — all traffic is over HTTPS; there is no plaintext connection mode.
+- **Auth scope** — only username + password authentication is supported by this connector (see the note above).
+- **Visibility is role-scoped** — you can only see and query objects your role has been granted access to.
 
 ## For AI agents
 
-This connector includes `CLAUDE.md` and `AGENTS.md` files — machine-readable references used by AI agents and agentic frameworks. They document authentication types, available endpoints, post-auth steps, and any caveats for programmatic use. Both files are kept identical — `CLAUDE.md` is for Claude Code, `AGENTS.md` is for other agent frameworks.
+This connector includes `CLAUDE.md` and `AGENTS.md` files — machine-readable references used by AI agents and agentic frameworks. They document authentication types, connection fields, and any caveats for programmatic use. Both files are kept identical — `CLAUDE.md` is for Claude Code, `AGENTS.md` is for other agent frameworks.
 
 ## Create a connector to any system
 
@@ -87,7 +113,8 @@ All connectors in this registry are community-maintained and live at [github.com
 
 ## Links
 
-- [API Documentation](REPLACE with URL)
+- [Snowflake Documentation](https://docs.snowflake.com)
+- [ADBC Snowflake Driver](https://arrow.apache.org/adbc/current/driver/snowflake.html)
 - [Analitiq Cloud](https://analitiq-app.com)
 - [Analitiq Engine (open source)](https://github.com/analitiq-ai/analitiq-engine)
 - [Analitiq DIP Registry (open source)](https://github.com/analitiq-dip-registry)
