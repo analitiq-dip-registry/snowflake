@@ -1,5 +1,9 @@
 # Snowflake
 
+[![Status: unverified](https://img.shields.io/badge/status-unverified-orange)](https://github.com/analitiq-dip-registry)
+[![Latest release](https://img.shields.io/github/v/release/analitiq-dip-registry/snowflake)](https://github.com/analitiq-dip-registry/snowflake/releases)
+[![License: Apache 2.0](https://img.shields.io/badge/license-Apache%202.0-blue)](LICENSE)
+
 Connect to a [Snowflake](https://www.snowflake.com) cloud data warehouse and read data from any database, schema, and table your role can access. Uses the native ADBC Snowflake driver with standard username and password authentication over TLS.
 
 ## What is this?
