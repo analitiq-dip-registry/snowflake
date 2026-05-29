@@ -11,22 +11,40 @@
     "adbc",
     "olap"
   ],
-  "version": "0.0.0",
+  "version": "0.0.1",
   "default_transport": "database",
   "transports": {
     "database": {
       "transport_type": "adbc",
       "driver": "snowflake",
       "db_kwargs": {
-        "adbc.snowflake.sql.account": { "ref": "connection.parameters.account" },
-        "username": { "ref": "connection.parameters.username" },
-        "password": { "ref": "secrets.password" },
-        "adbc.snowflake.sql.warehouse": { "ref": "connection.parameters.warehouse" },
-        "adbc.snowflake.sql.db": { "ref": "connection.parameters.database" },
-        "adbc.snowflake.sql.schema": { "ref": "connection.parameters.schema" },
-        "adbc.snowflake.sql.role": { "ref": "connection.parameters.role" },
-        "adbc.snowflake.sql.uri.host": { "ref": "connection.parameters.host" },
-        "adbc.snowflake.sql.uri.port": { "ref": "connection.parameters.port" },
+        "adbc.snowflake.sql.account": {
+          "ref": "connection.parameters.account"
+        },
+        "username": {
+          "ref": "connection.parameters.username"
+        },
+        "password": {
+          "ref": "secrets.password"
+        },
+        "adbc.snowflake.sql.warehouse": {
+          "ref": "connection.parameters.warehouse"
+        },
+        "adbc.snowflake.sql.db": {
+          "ref": "connection.parameters.database"
+        },
+        "adbc.snowflake.sql.schema": {
+          "ref": "connection.parameters.schema"
+        },
+        "adbc.snowflake.sql.role": {
+          "ref": "connection.parameters.role"
+        },
+        "adbc.snowflake.sql.uri.host": {
+          "ref": "connection.parameters.host"
+        },
+        "adbc.snowflake.sql.uri.port": {
+          "ref": "connection.parameters.port"
+        },
         "adbc.snowflake.sql.auth_type": "auth_snowflake"
       }
     }
