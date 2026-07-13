@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.0] - 2026-07-13
+
+### Added
+- Refactor Snowflake connector to current shape (split type maps, add package) (#5)
+
 ## [0.0.3] - 2026-05-29
 
 ### Fixed
