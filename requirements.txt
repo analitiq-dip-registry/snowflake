@@ -1,0 +1,5 @@
+# THIS connector's driver only (the engine pins no database drivers).
+# The ADBC Snowflake driver exchanges Arrow buffers natively (PUT to an
+# internal stage + COPY INTO); adbc-driver-manager is the shared ADBC runtime.
+adbc-driver-snowflake>=1.1.0
+adbc-driver-manager>=1.1.0
