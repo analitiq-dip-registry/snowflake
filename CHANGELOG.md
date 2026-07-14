@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.1] - 2026-07-14
+
+### Fixed
+- fix: add snowflake-sqlalchemy for the read-path SQL compiler (#6)
+
 ## [0.2.0] - 2026-07-13
 
 ### Added
