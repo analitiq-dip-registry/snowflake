@@ -11,6 +11,13 @@ SQLAlchemy/TLS hooks stay on the neutral base. Snowflake is HTTPS/TLS-only
 over port 443 with no selectable TLS mode, so there is no ``ssl_mode``
 input and no ``build_tls_connect_arg`` hook.
 
+"No SQLAlchemy transport" covers only the connect/write path: no SQLAlchemy
+``Engine`` is ever constructed here. The engine's shared read path still
+compiles paged ``SELECT``s through SQLAlchemy Core and resolves this dialect
+via ``sqlalchemy.dialects.registry.load("snowflake")``, so
+``snowflake-sqlalchemy`` is a required runtime dependency (see
+``requirements.txt``).
+
 The write direction is fully declarative: ``definition/type-map-write.json``
 owns every column-type render, so this dialect ships no Python
 type-rendering table and needs no ``render_column_type`` override.
