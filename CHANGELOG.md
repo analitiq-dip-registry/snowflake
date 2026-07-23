@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.2.2] - 2026-07-23
+
+### Fixed
+- fix: release ADBC ingest-targeting fix (#8); sync AGENTS.md and README docs (#9)
+
 ## [0.2.1] - 2026-07-14
 
 ### Fixed
