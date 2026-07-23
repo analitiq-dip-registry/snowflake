@@ -53,7 +53,13 @@ class SnowflakeDialect(SqlDialect):
     supports_upsert_adbc = True
 
     # ---- ADBC-only write path ------------------------------------------------
-    def adbc_ingest_kwargs(self, address: TableAddress) -> dict[str, Any]:
+    def adbc_ingest_kwargs(self, address: TableAddress) -> dict[str, Any]:  # skipcq: PYL-R0201
+        # Overrides the base ``SqlDialect`` hook, so it keeps that hook's
+        # ``(self, address)`` instance signature even though this
+        # implementation uses neither — the R0201 "no-self-use, make it a
+        # @staticmethod" hint is a false positive (a staticmethod would break
+        # the override contract and diverge from the sibling overrides).
+        #
         # The Snowflake ADBC driver does not implement
         # ``adbc.ingest.target_db_schema`` or ``adbc.ingest.target_catalog``;
         # forwarding either (the base default derives ``db_schema_name`` /
