@@ -65,3 +65,4 @@ The write direction renders canonical Arrow types back to Snowflake DDL (`Decima
 - Queries require an active virtual warehouse; set `warehouse` (or ensure the user has a default) or queries fail.
 - All traffic is over TLS/HTTPS; there is no plaintext mode.
 - Object visibility is limited to what the connecting role can access.
+- ADBC bulk writes land in the connection's **session schema** (`schema`, default `PUBLIC`) — the Snowflake ADBC driver implements no per-statement ingest schema/catalog targeting (`SnowflakeDialect.adbc_ingest_kwargs` returns `{}`), so there is no per-write schema override. The `schema` you configure must be the intended write target.
