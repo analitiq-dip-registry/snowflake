@@ -57,7 +57,7 @@ class SnowflakeDialect(SqlDialect):
         # The Snowflake ADBC driver does not implement
         # ``adbc.ingest.target_db_schema`` or ``adbc.ingest.target_catalog``;
         # forwarding either (the base default derives ``db_schema_name`` /
-        # ``catalog_name`` from the address) raises
+        # ``catalog_name`` from the address) raises, e.g.,
         # ``NOT_IMPLEMENTED: [Snowflake] Unknown statement option
         # 'adbc.ingest.target_db_schema'``. Returning no targeting kwargs lets
         # bulk ingest follow the connection's session schema
