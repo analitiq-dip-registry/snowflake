@@ -1,4 +1,4 @@
-"""conftest.py: install a CDK stub so connector.py can be imported without the CDK package."""
+"""CDK stub that lets connector.py be imported in tests without the real CDK package."""
 
 import os
 import sys

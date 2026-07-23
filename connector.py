@@ -54,10 +54,11 @@ class SnowflakeDialect(SqlDialect):
 
     # ---- Schema creation guard -----------------------------------------------
     def schema_is_implicit_default(self, schema_name: str) -> bool:
-        # Snowflake creates PUBLIC automatically in every new database and
-        # disallows dropping it. Issuing CREATE SCHEMA IF NOT EXISTS "PUBLIC"
-        # requires CREATESCHEMA on the database, a privilege most roles lack,
-        # so the engine must skip that DDL for PUBLIC.
+        # Snowflake provisions PUBLIC automatically in every new database and
+        # prevents it from being dropped. CREATE SCHEMA IF NOT EXISTS "PUBLIC"
+        # is still privilege-guarded (requires CREATESCHEMA on the database —
+        # not granted to most non-SYSADMIN roles by default), so the engine
+        # must skip that DDL for PUBLIC entirely.
         return schema_name.upper() == "PUBLIC"
 
     # ---- ADBC-only write path ------------------------------------------------
