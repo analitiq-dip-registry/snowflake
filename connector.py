@@ -52,6 +52,15 @@ class SnowflakeDialect(SqlDialect):
     system_schemas = ("INFORMATION_SCHEMA",)
     supports_upsert_adbc = True
 
+    # ---- Schema creation guard -----------------------------------------------
+    def schema_is_implicit_default(self, schema_name: str) -> bool:
+        # Snowflake provisions PUBLIC automatically in every new database and
+        # prevents it from being dropped. CREATE SCHEMA IF NOT EXISTS "PUBLIC"
+        # is still privilege-guarded (requires CREATESCHEMA on the database —
+        # not granted to most non-SYSADMIN roles by default), so the engine
+        # must skip that DDL for PUBLIC entirely.
+        return schema_name.upper() == "PUBLIC"
+
     # ---- ADBC-only write path ------------------------------------------------
     def adbc_ingest_kwargs(self, address: TableAddress) -> dict[str, Any]:  # skipcq: PYL-R0201
         # Overrides the base ``SqlDialect`` hook, so it keeps that hook's
