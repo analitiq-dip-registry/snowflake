@@ -47,19 +47,22 @@ Other Snowflake auth methods (key-pair/JWT, OAuth, MFA, external-browser SSO, Ok
 
 ## Type mapping
 
-Defined in `definition/type-map.json`. Notable mappings:
+Read direction (native → Arrow) is defined in `definition/type-map-read.json`; write direction (Arrow → native DDL) in `definition/type-map-write.json`. The read map covers the full Snowflake type vocabulary including declared aliases (`NUMERIC`/`DEC`/`INTEGER`/`BIGINT`/…, `TEXT`/`CHARACTER`/`NVARCHAR`/…, `FLOAT4`/`FLOAT8`/`DOUBLE PRECISION`/`REAL`, `DATETIME`, bare `TIMESTAMP`) so discovery output resolves whether Snowflake emits canonical or alias tokens. Notable mappings:
 
-- `NUMBER` / `DECIMAL` / `INT` → `Decimal128` (parameterized `NUMBER(p,s)` preserves precision/scale; `INT` is `NUMBER(38,0)`).
-- `FLOAT` / `DOUBLE` → `Float64`.
-- `VARCHAR` / `CHAR` / `STRING` → `Utf8`.
-- `BINARY` → `Binary`.
+- `NUMBER` / `DECIMAL` / `NUMERIC` / `DEC` / `INT` (and integer aliases) → `Decimal128` (parameterized `NUMBER(p,s)` preserves precision/scale; `INT` and friends are `NUMBER(38,0)`).
+- `FLOAT` / `FLOAT4` / `FLOAT8` / `DOUBLE` / `DOUBLE PRECISION` / `REAL` → `Float64`.
+- `VARCHAR` / `CHAR` / `STRING` / `TEXT` / `CHARACTER` / `NCHAR` / `NVARCHAR` (and length-qualified forms) → `Utf8`.
+- `BINARY` / `VARBINARY` → `Binary`.
 - `DATE` → `Date32`; `TIME` → `Time64(NANOSECOND)`.
-- `TIMESTAMP_NTZ` → `Timestamp(NANOSECOND)`; `TIMESTAMP_LTZ` / `TIMESTAMP_TZ` → `Timestamp(NANOSECOND, UTC)`.
-- `VARIANT` / `OBJECT` / `ARRAY` / `MAP` / `VECTOR` → `Json`.
+- `TIMESTAMP_NTZ` / `DATETIME` / bare `TIMESTAMP` → `Timestamp(NANOSECOND)`; `TIMESTAMP_LTZ` / `TIMESTAMP_TZ` → `Timestamp(NANOSECOND, UTC)`.
+- `VARIANT` / `OBJECT` / `ARRAY` / `MAP` / `VECTOR(<type>, <dim>)` → `Json`.
 - `GEOGRAPHY` / `GEOMETRY` → `Utf8` (serialized as text).
+
+The write direction renders canonical Arrow types back to Snowflake DDL (`Decimal128(p,s)` → `NUMBER(p,s)`, integers → `NUMBER(38,0)`, floats → `FLOAT`, `Utf8` → `VARCHAR`, `Binary` → `BINARY`, `Boolean` → `BOOLEAN`, `Date32` → `DATE`, `Time*` → `TIME`, `Timestamp(_)` → `TIMESTAMP_NTZ`, `Timestamp(_, UTC)` → `TIMESTAMP_LTZ`, `Json` → `VARIANT`).
 
 ## Caveats
 
 - Queries require an active virtual warehouse; set `warehouse` (or ensure the user has a default) or queries fail.
 - All traffic is over TLS/HTTPS; there is no plaintext mode.
 - Object visibility is limited to what the connecting role can access.
+- ADBC bulk writes land in the connection's **session schema** (`schema`, default `PUBLIC`) — the Snowflake ADBC driver implements no per-statement ingest schema/catalog targeting (`SnowflakeDialect.adbc_ingest_kwargs` returns `{}`), so there is no per-write schema override. The `schema` you configure must be the intended write target.

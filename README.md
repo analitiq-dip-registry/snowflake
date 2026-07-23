@@ -73,7 +73,7 @@ Snowflake is a database connector. Rather than a fixed set of endpoints, it disc
 
 ## Type mapping
 
-Snowflake's native SQL types are mapped to Analitiq's canonical (Arrow-based) types by `definition/type-map.json`. Highlights:
+Snowflake's native SQL types are mapped to Analitiq's canonical (Arrow-based) types by `definition/type-map-read.json`; the write direction (Arrow → Snowflake DDL) is defined in `definition/type-map-write.json`. Highlights:
 
 - `NUMBER` / `DECIMAL` / `INT` → `Decimal128` (Snowflake's `INT` is `NUMBER(38,0)`)
 - `FLOAT` / `DOUBLE` → `Float64`
@@ -90,6 +90,7 @@ Snowflake's native SQL types are mapped to Analitiq's canonical (Arrow-based) ty
 - **TLS only** — all traffic is over HTTPS; there is no plaintext connection mode.
 - **Auth scope** — only username + password authentication is supported by this connector (see the note above).
 - **Visibility is role-scoped** — you can only see and query objects your role has been granted access to.
+- **Writes land in the session schema** — the Snowflake ADBC driver has no per-statement schema/catalog targeting, so bulk writes always go to the connection's `schema` (default `PUBLIC`). Set `schema` to the intended write target.
 
 ## For AI agents
 
