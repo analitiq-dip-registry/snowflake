@@ -68,7 +68,11 @@ class SnowflakeDialect(SqlDialect):
     # stage-name-budget conformance check, which reads this attribute
     # precisely because the declared-budget reading would be vacuous).
     # The engine treats the number as BYTES while Snowflake documents it in
-    # characters — safe in this direction, since bytes <= characters always.
+    # characters. UTF-8 uses 1-4 bytes per character, so byte length is always
+    # >= character length, which makes a 255-byte budget at least as strict as
+    # Snowflake's 255-character limit: the engine can never compose a name
+    # Snowflake would reject. The only cost is a false refusal of a multibyte
+    # identifier Snowflake would have accepted — the safe direction to err.
     max_identifier_length = 255
 
     # ---- stage-then-merge write path -----------------------------------------

@@ -28,7 +28,7 @@ Snowflake is a cloud data warehouse. This connector reads from and writes to Sno
 | `stage.scope` | `temp` | A Snowflake `TEMPORARY` table is session-scoped, so the stage gets a bare, schema-less address that resolves through the same session namespace as the driver's untargeted ingest. This is what lets the *target* live in any database/schema while landing still works. A `real` stage would inherit the target's catalog and silently land in the wrong place. |
 | `stage.schema` | `target` | No dedicated staging schema. |
 | `stage.transactional_ddl` | `false` | Snowflake DDL implicitly commits the active transaction and cannot be rolled back. |
-| `limits.max_identifier_len` | `255` | Snowflake's documented ceiling (characters; the engine enforces bytes, which is safe in this direction). Must stay in sync with `SnowflakeDialect.max_identifier_length`. |
+| `limits.max_identifier_len` | `255` | Snowflake's documented ceiling. Snowflake counts **characters**, the engine enforces **bytes**; since UTF-8 byte length is always >= character length, a 255-byte budget is at least as strict as a 255-character limit, so the engine can never compose a name Snowflake would reject (at worst it falsely refuses a multibyte one). Must stay in sync with `SnowflakeDialect.max_identifier_length` — the tier-1 stage-name test reads the class attribute, and the base default of 63 (Postgres `NAMEDATALEN - 1`) is the wrong fact for Snowflake. |
 
 `max_bind_params` is deliberately omitted — Snowflake documents no such limit, and the `adbc_ingest` landing path is bindless anyway.
 
