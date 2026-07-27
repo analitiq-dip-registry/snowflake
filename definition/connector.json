@@ -3,7 +3,8 @@
   "kind": "database",
   "connector_id": "snowflake",
   "display_name": "Snowflake",
-  "description": "Snowflake cloud data warehouse connector using the native ADBC Snowflake driver with standard username and password authentication over TLS.",
+  "description": "Snowflake cloud data warehouse connector built on the native ADBC Snowflake driver. Reads compile to paged SELECTs and stream back as Arrow; writes run the stage-then-MERGE primitive, landing each batch through the driver's own bulk ingest (Arrow -> Parquet -> PUT to a temporary internal stage -> COPY INTO) and applying it to the target with MERGE / INSERT ... SELECT. Authenticates with a Snowflake username and password over HTTPS on port 443.",
+  "documentation_url": "https://docs.snowflake.com/",
   "tags": [
     "database",
     "warehouse",
@@ -39,6 +40,7 @@
         "adbc.snowflake.sql.role": {
           "ref": "connection.parameters.role"
         },
+        "adbc.snowflake.sql.uri.protocol": "https",
         "adbc.snowflake.sql.uri.host": {
           "ref": "connection.parameters.host"
         },
@@ -63,7 +65,8 @@
         "ui": {
           "label": "Account identifier",
           "placeholder": "orgname-account_name",
-          "widget": "text"
+          "widget": "text",
+          "help_text": "Snowflake account identifier without the .snowflakecomputing.com suffix."
         }
       },
       "warehouse": {
@@ -75,7 +78,8 @@
         "ui": {
           "label": "Warehouse",
           "placeholder": "COMPUTE_WH",
-          "widget": "text"
+          "widget": "text",
+          "help_text": "Virtual warehouse that executes queries. Leave blank only if the user has a default warehouse; without one, every query fails."
         }
       },
       "database": {
@@ -86,7 +90,8 @@
         "required": false,
         "ui": {
           "label": "Database",
-          "widget": "text"
+          "widget": "text",
+          "help_text": "Database selected for the session. Required for writes: each batch is staged in a session-scoped temporary table that resolves against the session's current database and schema."
         }
       },
       "schema": {
@@ -99,7 +104,8 @@
         "ui": {
           "label": "Schema",
           "placeholder": "PUBLIC",
-          "widget": "text"
+          "widget": "text",
+          "help_text": "Schema selected for the session. Required for writes: batch staging resolves against it. The connecting role needs CREATE STAGE on this schema - the ADBC bulk-ingest path creates a temporary internal stage there."
         }
       },
       "role": {
@@ -110,7 +116,8 @@
         "required": false,
         "ui": {
           "label": "Role",
-          "widget": "text"
+          "widget": "text",
+          "help_text": "Authorization role. Defaults to the user's default role; object visibility and write privileges are scoped to it."
         }
       },
       "host": {
@@ -122,7 +129,8 @@
         "ui": {
           "label": "Host override",
           "placeholder": "<account>.snowflakecomputing.com",
-          "widget": "text"
+          "widget": "text",
+          "help_text": "Explicit host. Normally derived from the account identifier; set only for private-link or non-standard endpoints."
         }
       },
       "port": {
@@ -134,7 +142,8 @@
         "default": 443,
         "ui": {
           "label": "Port",
-          "widget": "number"
+          "widget": "number",
+          "help_text": "Snowflake serves all client traffic on 443 over HTTPS."
         }
       },
       "username": {
@@ -160,6 +169,22 @@
           "widget": "password"
         }
       }
+    }
+  },
+  "sql_capabilities": {
+    "catalog": "full",
+    "session_targeting": "session_default",
+    "merge_form": "merge",
+    "bulk_load": {
+      "adbc": "adbc_ingest"
+    },
+    "stage": {
+      "scope": "temp",
+      "schema": "target",
+      "transactional_ddl": false
+    },
+    "limits": {
+      "max_identifier_len": 255
     }
   },
   "resource_discovery": {

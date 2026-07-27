@@ -1,22 +1,25 @@
 [
-  { "match": "regex", "native": "^(?:NUMBER|DECIMAL|DEC|NUMERIC)\\((?<precision>[0-9]+),\\s*(?<scale>[0-9]+)\\)$", "canonical": "Decimal128(${precision}, ${scale})" },
-  { "match": "regex", "native": "^(?:NUMBER|DECIMAL|DEC|NUMERIC)\\((?<precision>[0-9]+)\\)$", "canonical": "Decimal128(${precision}, 0)" },
+  { "match": "regex", "native": "^(?:NUMBER|DECIMAL|DEC|NUMERIC)\\((?<precision>[1-9]|[12][0-9]|3[0-8]),\\s*(?<scale>[0-9]|[12][0-9]|3[0-7])\\)$", "canonical": "Decimal128(${precision}, ${scale})" },
+  { "match": "regex", "native": "^(?:NUMBER|DECIMAL|DEC|NUMERIC)\\((?<precision>[1-9]|[12][0-9]|3[0-8])\\)$", "canonical": "Decimal128(${precision}, 0)" },
   { "match": "exact", "native": "NUMBER", "canonical": "Decimal128(38, 0)" },
   { "match": "exact", "native": "DECIMAL", "canonical": "Decimal128(38, 0)" },
   { "match": "exact", "native": "DEC", "canonical": "Decimal128(38, 0)" },
   { "match": "exact", "native": "NUMERIC", "canonical": "Decimal128(38, 0)" },
+
   { "match": "exact", "native": "INT", "canonical": "Decimal128(38, 0)" },
   { "match": "exact", "native": "INTEGER", "canonical": "Decimal128(38, 0)" },
   { "match": "exact", "native": "BIGINT", "canonical": "Decimal128(38, 0)" },
   { "match": "exact", "native": "SMALLINT", "canonical": "Decimal128(38, 0)" },
   { "match": "exact", "native": "TINYINT", "canonical": "Decimal128(38, 0)" },
   { "match": "exact", "native": "BYTEINT", "canonical": "Decimal128(38, 0)" },
+
   { "match": "exact", "native": "FLOAT", "canonical": "Float64" },
   { "match": "exact", "native": "FLOAT4", "canonical": "Float64" },
   { "match": "exact", "native": "FLOAT8", "canonical": "Float64" },
   { "match": "exact", "native": "DOUBLE", "canonical": "Float64" },
   { "match": "exact", "native": "DOUBLE PRECISION", "canonical": "Float64" },
   { "match": "exact", "native": "REAL", "canonical": "Float64" },
+
   { "match": "regex", "native": "^(?:VARCHAR|CHAR|CHARACTER|STRING|TEXT|VARCHAR2|NCHAR|NVARCHAR|NVARCHAR2|CHAR VARYING|CHARACTER VARYING|NCHAR VARYING)\\((?:[0-9]+)\\)$", "canonical": "Utf8" },
   { "match": "exact", "native": "VARCHAR", "canonical": "Utf8" },
   { "match": "exact", "native": "CHAR", "canonical": "Utf8" },
@@ -30,29 +33,53 @@
   { "match": "exact", "native": "NVARCHAR", "canonical": "Utf8" },
   { "match": "exact", "native": "NVARCHAR2", "canonical": "Utf8" },
   { "match": "exact", "native": "NCHAR VARYING", "canonical": "Utf8" },
+
   { "match": "regex", "native": "^(?:BINARY|VARBINARY)\\((?:[0-9]+)\\)$", "canonical": "Binary" },
   { "match": "exact", "native": "BINARY", "canonical": "Binary" },
   { "match": "exact", "native": "VARBINARY", "canonical": "Binary" },
+
   { "match": "exact", "native": "BOOLEAN", "canonical": "Boolean" },
   { "match": "exact", "native": "DATE", "canonical": "Date32" },
+
   { "match": "regex", "native": "^TIME\\((?:[0-9]+)\\)$", "canonical": "Time64(NANOSECOND)" },
   { "match": "exact", "native": "TIME", "canonical": "Time64(NANOSECOND)" },
+
   { "match": "regex", "native": "^TIMESTAMP_NTZ\\((?:[0-9]+)\\)$", "canonical": "Timestamp(NANOSECOND)" },
   { "match": "exact", "native": "TIMESTAMP_NTZ", "canonical": "Timestamp(NANOSECOND)" },
+  { "match": "regex", "native": "^TIMESTAMPNTZ\\((?:[0-9]+)\\)$", "canonical": "Timestamp(NANOSECOND)" },
+  { "match": "exact", "native": "TIMESTAMPNTZ", "canonical": "Timestamp(NANOSECOND)" },
+  { "match": "regex", "native": "^TIMESTAMP\\((?:[0-9]+)\\) WITHOUT TIME ZONE$", "canonical": "Timestamp(NANOSECOND)" },
+  { "match": "exact", "native": "TIMESTAMP WITHOUT TIME ZONE", "canonical": "Timestamp(NANOSECOND)" },
+
   { "match": "regex", "native": "^TIMESTAMP_LTZ\\((?:[0-9]+)\\)$", "canonical": "Timestamp(NANOSECOND, UTC)" },
   { "match": "exact", "native": "TIMESTAMP_LTZ", "canonical": "Timestamp(NANOSECOND, UTC)" },
+  { "match": "regex", "native": "^TIMESTAMPLTZ\\((?:[0-9]+)\\)$", "canonical": "Timestamp(NANOSECOND, UTC)" },
+  { "match": "exact", "native": "TIMESTAMPLTZ", "canonical": "Timestamp(NANOSECOND, UTC)" },
+  { "match": "regex", "native": "^TIMESTAMP\\((?:[0-9]+)\\) WITH LOCAL TIME ZONE$", "canonical": "Timestamp(NANOSECOND, UTC)" },
+  { "match": "exact", "native": "TIMESTAMP WITH LOCAL TIME ZONE", "canonical": "Timestamp(NANOSECOND, UTC)" },
+
   { "match": "regex", "native": "^TIMESTAMP_TZ\\((?:[0-9]+)\\)$", "canonical": "Timestamp(NANOSECOND, UTC)" },
   { "match": "exact", "native": "TIMESTAMP_TZ", "canonical": "Timestamp(NANOSECOND, UTC)" },
+  { "match": "regex", "native": "^TIMESTAMPTZ\\((?:[0-9]+)\\)$", "canonical": "Timestamp(NANOSECOND, UTC)" },
+  { "match": "exact", "native": "TIMESTAMPTZ", "canonical": "Timestamp(NANOSECOND, UTC)" },
+  { "match": "regex", "native": "^TIMESTAMP\\((?:[0-9]+)\\) WITH TIME ZONE$", "canonical": "Timestamp(NANOSECOND, UTC)" },
+  { "match": "exact", "native": "TIMESTAMP WITH TIME ZONE", "canonical": "Timestamp(NANOSECOND, UTC)" },
+
   { "match": "regex", "native": "^TIMESTAMP\\((?:[0-9]+)\\)$", "canonical": "Timestamp(NANOSECOND)" },
   { "match": "exact", "native": "TIMESTAMP", "canonical": "Timestamp(NANOSECOND)" },
   { "match": "regex", "native": "^DATETIME\\((?:[0-9]+)\\)$", "canonical": "Timestamp(NANOSECOND)" },
   { "match": "exact", "native": "DATETIME", "canonical": "Timestamp(NANOSECOND)" },
+
+  { "match": "regex", "native": "^ARRAY\\(.+\\)$", "canonical": "Json" },
+  { "match": "regex", "native": "^OBJECT\\(.+\\)$", "canonical": "Json" },
   { "match": "regex", "native": "^MAP\\(.+\\)$", "canonical": "Json" },
+  { "match": "regex", "native": "^VECTOR\\((?:[A-Z]+),\\s*(?:[0-9]+)\\)$", "canonical": "Json" },
   { "match": "exact", "native": "VARIANT", "canonical": "Json" },
   { "match": "exact", "native": "OBJECT", "canonical": "Json" },
   { "match": "exact", "native": "ARRAY", "canonical": "Json" },
   { "match": "exact", "native": "MAP", "canonical": "Json" },
+
   { "match": "exact", "native": "GEOGRAPHY", "canonical": "Utf8" },
   { "match": "exact", "native": "GEOMETRY", "canonical": "Utf8" },
-  { "match": "regex", "native": "^VECTOR\\((?:[A-Z]+),\\s*(?:[0-9]+)\\)$", "canonical": "Json" }
+  { "match": "exact", "native": "UUID", "canonical": "Utf8" }
 ]

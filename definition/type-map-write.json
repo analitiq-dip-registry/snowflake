@@ -1,4 +1,5 @@
 [
+  { "match": "exact", "canonical": "Null", "native": "VARCHAR" },
   { "match": "exact", "canonical": "Boolean", "native": "BOOLEAN" },
 
   { "match": "exact", "canonical": "Int8", "native": "NUMBER(38, 0)" },
@@ -14,22 +15,26 @@
   { "match": "exact", "canonical": "Float32", "native": "FLOAT" },
   { "match": "exact", "canonical": "Float64", "native": "FLOAT" },
 
-  { "match": "regex", "canonical": "^Decimal(128|256)\\((?<p>\\d+),\\s*(?<s>\\d+)\\)$", "native": "NUMBER(${p}, ${s})" },
+  { "match": "regex", "canonical": "^Decimal(?:128|256)\\((?<p>[1-9]|[12][0-9]|3[0-8]),\\s*(?<s>[0-9]|[12][0-9]|3[0-7])\\)$", "native": "NUMBER(${p}, ${s})" },
+
+  { "match": "regex", "canonical": "^Duration\\([A-Z]+\\)$", "native": "NUMBER(38, 0)" },
 
   { "match": "exact", "canonical": "Utf8", "native": "VARCHAR" },
   { "match": "exact", "canonical": "LargeUtf8", "native": "VARCHAR" },
 
   { "match": "exact", "canonical": "Json", "native": "VARIANT" },
+  { "match": "exact", "canonical": "Object", "native": "VARIANT" },
+  { "match": "exact", "canonical": "List", "native": "VARIANT" },
 
   { "match": "exact", "canonical": "Binary", "native": "BINARY" },
   { "match": "exact", "canonical": "LargeBinary", "native": "BINARY" },
-  { "match": "regex", "canonical": "^FixedSizeBinary\\(\\d+\\)$", "native": "BINARY" },
+  { "match": "regex", "canonical": "^FixedSizeBinary\\([0-9]+\\)$", "native": "BINARY" },
 
   { "match": "exact", "canonical": "Date32", "native": "DATE" },
   { "match": "exact", "canonical": "Date64", "native": "DATE" },
 
-  { "match": "regex", "canonical": "^Time(32|64)\\([A-Z]+\\)$", "native": "TIME" },
+  { "match": "regex", "canonical": "^Time(?:32|64)\\([A-Z]+\\)$", "native": "TIME" },
 
-  { "match": "regex", "canonical": "^Timestamp\\([A-Z]+\\)$", "native": "TIMESTAMP_NTZ" },
-  { "match": "regex", "canonical": "^Timestamp\\([A-Z]+,\\s*UTC\\)$", "native": "TIMESTAMP_LTZ" }
+  { "match": "regex", "canonical": "^Timestamp\\([A-Z]+(?:,\\s*null)?\\)$", "native": "TIMESTAMP_NTZ" },
+  { "match": "regex", "canonical": "^Timestamp\\([A-Z]+,\\s*.+\\)$", "native": "TIMESTAMP_LTZ" }
 ]
