@@ -37,6 +37,7 @@ Before you can connect, you need:
 - A Snowflake **user** with a password and access to at least one warehouse, database, and schema.
 - A **virtual warehouse** that the user can use to run queries (queries require an active warehouse).
 - A **role** granting the privileges you need (optional — defaults to the user's default role).
+- **To write data:** the role needs `CREATE STAGE` on the session schema, plus a session `database` and `schema`. Each batch is loaded through the ADBC driver's bulk-ingest path, which creates a temporary internal stage there before running `COPY INTO`.
 
 ## Authentication
 
@@ -81,8 +82,11 @@ Snowflake's native SQL types are mapped to Analitiq's canonical (Arrow-based) ty
 - `BINARY` → `Binary`
 - `DATE` → `Date32`, `TIME` → `Time64`
 - `TIMESTAMP_NTZ` → `Timestamp`, `TIMESTAMP_LTZ` / `TIMESTAMP_TZ` → `Timestamp(..., UTC)`
-- `VARIANT` / `OBJECT` / `ARRAY` / `MAP` / `VECTOR` → `Json`
+- `VARIANT` / `OBJECT` / `ARRAY` / `MAP` / `VECTOR` → `Json` (including the structured spellings `ARRAY(t)`, `OBJECT(k t, …)`, `MAP(k, v)`)
 - `GEOGRAPHY` / `GEOMETRY` → `Utf8` (serialized as text)
+- `UUID` → `Utf8` (Snowflake renders it as the 36-character hyphenated form)
+
+Two natives are deliberately **left unmapped**, because the ADBC driver documents no Arrow representation for them: `DECFLOAT` (its exponent range does not fit `Decimal128`, and `Float64` cannot hold 38 significant digits) and `FILE` (a staged-file reference, not a value). A column of either type raises a clear "unmapped type" error naming the type, rather than being silently coerced to something lossy.
 
 ## Limitations
 
@@ -90,7 +94,8 @@ Snowflake's native SQL types are mapped to Analitiq's canonical (Arrow-based) ty
 - **TLS only** — all traffic is over HTTPS; there is no plaintext connection mode.
 - **Auth scope** — only username + password authentication is supported by this connector (see the note above).
 - **Visibility is role-scoped** — you can only see and query objects your role has been granted access to.
-- **Writes land in the session schema** — the Snowflake ADBC driver has no per-statement schema/catalog targeting, so bulk writes always go to the connection's `schema` (default `PUBLIC`). Set `schema` to the intended write target.
+- **Writes need a session database, schema, and `CREATE STAGE`** — the Snowflake ADBC driver has no per-statement schema/catalog targeting, so each batch is staged in a session-scoped temporary table and loaded through a temporary internal stage in the connection's `schema` (default `PUBLIC`). The *target* table can be in any database and schema your role can write to, but the connection must have both `database` and `schema` set, and the role needs `CREATE STAGE` on that schema.
+- **Upsert batches must be key-unique** — Snowflake's `ERROR_ON_NONDETERMINISTIC_MERGE` defaults to `TRUE`, so an upsert batch containing two rows with the same conflict key fails the `MERGE` outright. This connector does not silently de-duplicate: with no ordering column in the contract, any automatic pick would drop a row arbitrarily, so it lets the error surface instead.
 
 ## For AI agents
 
