@@ -12,7 +12,7 @@
     "adbc",
     "olap"
   ],
-  "version": "0.2.2",
+  "version": "0.3.0",
   "default_transport": "database",
   "transports": {
     "database": {

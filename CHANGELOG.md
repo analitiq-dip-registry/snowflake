@@ -1,5 +1,10 @@
 # Changelog
 
+## [0.3.0] - 2026-08-02
+
+### Added
+- feat: regenerate Snowflake connector against the rc17 contract line (#12)
+
 ## [0.2.2] - 2026-07-23
 
 ### Fixed
