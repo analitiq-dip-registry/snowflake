@@ -73,7 +73,7 @@ Other Snowflake auth methods (key-pair/JWT, OAuth, MFA, external-browser SSO, Ok
 
 ## Type mapping
 
-Read direction (native → Arrow) is defined in `definition/type-map-read.json`; write direction (Arrow → native DDL) in `definition/type-map-write.json`. The read map covers the full Snowflake type vocabulary including declared aliases (`NUMERIC`/`DEC`/`INTEGER`/`BIGINT`/…, `TEXT`/`CHARACTER`/`NVARCHAR`/…, `FLOAT4`/`FLOAT8`/`DOUBLE PRECISION`/`REAL`, `DATETIME`, bare `TIMESTAMP`) so discovery output resolves whether Snowflake emits canonical or alias tokens. Notable mappings:
+Both directions live in `definition/type-map.json`: the `read` section maps native → Arrow, the `write` section maps Arrow → native DDL. The read map covers the full Snowflake type vocabulary including declared aliases (`NUMERIC`/`DEC`/`INTEGER`/`BIGINT`/…, `TEXT`/`CHARACTER`/`NVARCHAR`/…, `FLOAT4`/`FLOAT8`/`DOUBLE PRECISION`/`REAL`, `DATETIME`, bare `TIMESTAMP`) so discovery output resolves whether Snowflake emits canonical or alias tokens. Notable mappings:
 
 - `NUMBER` / `DECIMAL` / `NUMERIC` / `DEC` / `INT` (and integer aliases) → `Decimal128` (parameterized `NUMBER(p,s)` preserves precision/scale; `INT` and friends are `NUMBER(38,0)`).
 - `FLOAT` / `FLOAT4` / `FLOAT8` / `DOUBLE` / `DOUBLE PRECISION` / `REAL` → `Float64`.

@@ -23,7 +23,7 @@ via ``sqlalchemy.dialects.registry.load("snowflake")``, so
 ``requirements.txt``). The registered SA dialect name equals ``name``, so
 ``sqlalchemy_registry_name`` stays on the base default.
 
-The write direction is fully declarative: ``definition/type-map-write.json``
+The write direction is fully declarative: the ``write`` section of ``definition/type-map.json``
 owns every column-type render, so this dialect ships no Python
 type-rendering table and needs no ``render_column_type`` override. The
 write-path *shape* facts (catalog addressing, session targeting, merge
