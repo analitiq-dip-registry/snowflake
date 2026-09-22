@@ -74,7 +74,7 @@ Snowflake is a database connector. Rather than a fixed set of endpoints, it disc
 
 ## Type mapping
 
-Snowflake's native SQL types are mapped to Analitiq's canonical (Arrow-based) types by `definition/type-map-read.json`; the write direction (Arrow → Snowflake DDL) is defined in `definition/type-map-write.json`. Highlights:
+Snowflake's native SQL types are mapped to Analitiq's canonical (Arrow-based) types by the `read` section of `definition/type-map.json`; the write direction (Arrow → Snowflake DDL) is the `write` section of the same file. Highlights:
 
 - `NUMBER` / `DECIMAL` / `INT` → `Decimal128` (Snowflake's `INT` is `NUMBER(38,0)`)
 - `FLOAT` / `DOUBLE` → `Float64`
